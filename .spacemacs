@@ -34,7 +34,13 @@ This function should only modify configuration layer settings."
    dotspacemacs-configuration-layers
    '(yaml
      html
-     python
+     lsp
+     (python
+      :variables
+      python-backend 'lsp
+      )
+     latex
+     conda
      ;; ----------------------------------------------------------------
      ;; Example of useful layers you may want to use right away.
      ;; Uncomment some layer names and press `SPC f e R' (Vim style) or
@@ -184,8 +190,11 @@ It should only modify the values of Spacemacs settings."
    ;; section of the documentation for details on available variables.
    ;; (default 'vim)
 
-   dotspacemacs-editing-style '(hybrid :variables
-                                       hybrid-mode-default-state 'hybrid)
+   ;; default state hybrid is emacs
+   ;; dotspacemacs-editing-style '(hybrid :variables
+   ;;                                     hybrid-mode-default-state 'hybrid)
+   ;; default state hybrid is vim
+   dotspacemacs-editing-style 'hybrid
 
    ;; If non-nil show the version string in the Spacemacs buffer. It will
    ;; appear as (spacemacs version)@(emacs version)
@@ -552,23 +561,31 @@ before packages are loaded."
   ;; (defconst spacemacs-banner-official-png
   ;; (expand-file-name (concat spacemacs-banner-directory "img/spacemacs.png"))
 
-
-  (semantic-mode t)
-
+  (setq-default dotspacemacs-configuration-layers
+                '((conda :variables conda-anaconda-home "~/anaconda3/envs/gwml")))
   ;; yatex
-  (require 'yatex)
-  (add-to-list 'auto-mode-alist '("\\.tex\\'" . yatex-mode)) ;;auto-mode-alistへの追加
-  (setq tex-command "platex -shell-escape") ;; -shell-escape for graph
-  (setq bibtex-command "pbibtex")
-  ;;reftex-mode
-  (add-hook 'yatex-mode-hook
-            '(lambda ()
-               (reftex-mode 1)
-               (define-key reftex-mode-map
-                 (concat YaTeX-prefix ">") 'YaTeX-comment-region)
-               (define-key reftex-mode-map
-                 (concat YaTeX-prefix "<") 'YaTeX-uncomment-region)))
-  
+  ;; (add-to-list 'auto-mode-alist '("\\.tex\\'" . yatex-mode)) ;;auto-mode-alistへの追加
+  ;; (setq tex-command "platex -shell-escape") ;; -shell-escape for graph
+  ;; (setq bibtex-command "pbibtex")
+  ;; ;;reftex-mode
+  ;; (add-hook 'yatex-mode-hook
+  ;;           '(lambda ()
+  ;;              (reftex-mode 1)
+  ;;              (define-key reftex-mode-map
+  ;;                (concat YaTeX-prefix ">") 'YaTeX-comment-region)
+  ;;              (define-key reftex-mode-map
+  ;;                (concat YaTeX-prefix "<") 'YaTeX-uncomment-region)))
+
+  ;; latex
+  (add-hook 'LaTeX-mode-hook
+            (function (lambda ()
+                        (add-to-list 'TeX-command-list
+                                     '("LatexMk"
+                                       "latexmk -pvc %t"
+                                       TeX-run-TeX nil (latex-mode) :help "Run LatexMk")))))
+
+
+
 ;; pdfview settings
   (use-package pdf-tools
     :ensure t
@@ -590,10 +607,6 @@ before packages are loaded."
     ;; enable menu when PDFView
     )
 
-  ;; desktop settings
-  (custom-set-variables
-   '(desktop-save-mode t))
-  
   ;; tab-bar-mode and centaur-tabs
   (tab-bar-mode t)
   (centaur-tabs-mode t)
@@ -608,7 +621,6 @@ before packages are loaded."
   (add-hook 'dired-mode-hook 'all-the-icons-dired-mode)
 
   ;; minimap add list
-  (setq minimap-major-modes '(prog-mode yatex-mode))
   (setq minimap-major-modes '(prog-mode tex-mode))
 
 ;; (setq tramp-ssh-controlmaster-options
@@ -632,7 +644,6 @@ This function is called at the very end of Spacemacs initialization."
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
    '("c086fe46209696a2d01752c0216ed72fd6faeabaaaa40db9fc1518abebaf700d" "01cf34eca93938925143f402c2e6141f03abb341f27d1c2dba3d50af9357ce70" "6c3b5f4391572c4176908bb30eddc1718344b8eaff50e162e36f271f6de015ca" "4bca89c1004e24981c840d3a32755bf859a6910c65b829d9441814000cf6c3d0" "6084dce7da6b7447dcb9f93a981284dc823bab54f801ebf8a8e362a5332d2753" "5b809c3eae60da2af8a8cfba4e9e04b4d608cb49584cb5998f6e4a1c87c057c4" "fa2b58bb98b62c3b8cf3b6f02f058ef7827a8e497125de0254f56e373abee088" "6b80b5b0762a814c62ce858e9d72745a05dd5fc66f821a1c5023b4f2a76bc910" "aaa4c36ce00e572784d424554dcc9641c82d1155370770e231e10c649b59a074" "b5fff23b86b3fd2dd2cc86aa3b27ee91513adaefeaa75adc8af35a45ffb6c499" "79278310dd6cacf2d2f491063c4ab8b129fee2a498e4c25912ddaa6c3c5b621e" "3df5335c36b40e417fec0392532c1b82b79114a05d5ade62cfe3de63a59bc5c6" "c83c095dd01cde64b631fb0fe5980587deec3834dc55144a6e78ff91ebc80b19" "c4bdbbd52c8e07112d1bfd00fee22bf0f25e727e95623ecb20c4fa098b74c1bd" "fce3524887a0994f8b9b047aef9cc4cc017c5a93a5fb1f84d300391fba313743" "d6603a129c32b716b3d3541fc0b6bfe83d0e07f1954ee64517aa62c9405a3441" "e6ff132edb1bfa0645e2ba032c44ce94a3bd3c15e3929cdf6c049802cf059a2a" "4f01c1df1d203787560a67c1b295423174fd49934deb5e6789abd1e61dba9552" "1623aa627fecd5877246f48199b8e2856647c99c6acdab506173f9bb8b0a41ac" "bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" "76bfa9318742342233d8b0b42e824130b3a50dcc732866ff8e47366aed69de11" default))
- '(desktop-save-mode t)
  '(evil-want-Y-yank-to-eol nil)
  '(package-selected-packages
    '(yaml-mode beacon all-the-icons-ivy-rich ivy-rich treemacs cfrs ht pfuture web-mode web-beautify tagedit slim-mode scss-mode sass-mode pug-mode prettier-js impatient-mode simple-httpd haml-mode emmet-mode counsel-css company-web web-completion-data add-node-modules-path yapfify stickyfunc-enhance sphinx-doc pytest pyenv-mode py-isort pippel pipenv pyvenv pip-requirements lsp-python-ms lsp-pyright live-py-mode importmagic epc ctable concurrent deferred helm-pydoc helm-gtags helm-cscope helm xcscope helm-core ggtags dap-mode posframe lsp-treemacs bui lsp-mode dash-functional cython-mode counsel-gtags company-anaconda blacken anaconda-mode pythonic yatex yasnippet-snippets ws-butler writeroom-mode winum which-key wgrep volatile-highlights vi-tilde-fringe valign uuidgen use-package unfill undo-tree treemacs-projectile treemacs-persp treemacs-magit treemacs-icons-dired treemacs-evil toc-org symon symbol-overlay string-inflection spaceline-all-the-icons smex smeargle restart-emacs request rainbow-delimiters popwin pcre2el password-generator paradox overseer orgit org-superstar org-rich-yank org-projectile org-present org-pomodoro org-mime org-download org-cliplink org-brain open-junk-file nameless mwim move-text magit-svn magit-section magit-gitflow macrostep lorem-ipsum link-hint ivy-yasnippet ivy-xref ivy-purpose ivy-hydra ivy-avy indent-guide hybrid-mode hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers highlight-indentation helm-make google-translate golden-ratio gnuplot gitignore-templates gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link fuzzy forge font-lock+ flycheck-package flycheck-elsa flx-ido fancy-battery eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-textobj-line evil-surround evil-org evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-goggles evil-exchange evil-escape evil-ediff evil-easymotion evil-cleverparens evil-args evil-anzu eval-sexp-fu emr elisp-slime-nav editorconfig dumb-jump dotenv-mode dired-quick-sort diminish devdocs define-word counsel-projectile company column-enforce-mode clean-aindent-mode centered-cursor-mode auto-yasnippet auto-highlight-symbol auto-compile aggressive-indent ace-link ac-ispell)))
