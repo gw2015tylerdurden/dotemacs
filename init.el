@@ -63,6 +63,8 @@
 ;;
 ;; -----------------------------------------------------------------------------------------
 
+(setq backup-directory-alist '(("." . "~/.emacs.d/backup/")))
+
 ;; Silencer
 (leaf no-littering
   :doc "Keep .emacs.d clean"
@@ -155,8 +157,11 @@
 
 (leaf undo-tree
   :ensure t
-  :bind ("C-x u" . undotree-toggle)
+  :bind
+  ("C-x u" . undotree-toggle)
+  ("M-/" . undo-tree-redo)
   :config
+  (global-undo-tree-mode)
   (setq undotree-visualizer-timestamps t
         undotree-visualizer-diff t))
 
@@ -357,20 +362,17 @@
 ;; ;; -----------------------------------------------------------------------------------------
 
 (leaf all-the-icons
-  :if (window-system)
   :doc "All the icons is used by NeoTree"
   :url "https://github.com/domtronn/all-the-icons.el"
   :ensure t)
 
-(leaf treemacs
-  :doc "All the icons is used by teemacs"
-  :ensure t)
-
-
-(leaf treemacs-all-the-icons
-  :after treemacs all-the-icons
-  :ensure t
-  )
+(leaf dired
+  :config
+  (leaf all-the-icons-dired
+    :ensure t
+    :hook (dired-mode-hook . all-the-icons-dired-mode))
+  (leaf dired-sidebar
+    :ensure t))
 
 ;; ;; -----------------------------------------------------------------------------------------
 ;; ;;
@@ -440,6 +442,12 @@
   :ensure t
   :custom-face
   (marginalia-documentation . '((t (:foreground "#6272a4")))))
+
+(leaf all-the-icons-completion
+  :ensure t
+  :after (all-the-icons marginalia)
+  :init
+  (all-the-icons-completion-mode))
 
 (leaf orderless
   :doc "Completion style that matches multiple regexps"
@@ -615,20 +623,12 @@
 ;;   (when (memq system-type '(gnu/linux darwin))
 ;;     (exec-path-from-shell-initialize)))
 
-(leaf evil
-  :ensure t
-  :config
-  (evil-mode 1)
-  ;; 挿入モードで Emacs のキーバインドを使用
-  (define-key evil-insert-state-map (kbd "C-a") 'beginning-of-line)
-  (define-key evil-insert-state-map (kbd "C-e") 'end-of-line)
-  (define-key evil-insert-state-map (kbd "C-n") 'next-line)
-  (define-key evil-insert-state-map (kbd "C-p") 'previous-line)
-  (define-key evil-insert-state-map (kbd "C-k") 'kill-line)
-  (define-key evil-insert-state-map (kbd "C-y") 'yank)
-  (define-key evil-insert-state-map (kbd "C-d") 'delete-char)
-  (define-key evil-insert-state-map (kbd "C-o") 'newline)
-  )
+;; (leaf evil
+;;   :ensure t
+;;   :config
+;;   (evil-mode 1)
+;;   (define-key evil-insert-state-map (kbd "C-z") 'evil-emacs-state)
+;;   )
 
 
 ;; (leaf evil-collection
