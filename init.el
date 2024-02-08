@@ -163,7 +163,8 @@
   :config
   (global-undo-tree-mode)
   (setq undotree-visualizer-timestamps t
-        undotree-visualizer-diff t))
+        undotree-visualizer-diff t
+        auto-save-default nil))
 
 
 ;; ;; -----------------------------------------------------------------------------------------
@@ -321,6 +322,11 @@
   ;;                "latexmk -pvc %t"
   ;;                TeX-run-TeX nil t :help "Run LatexMk")))
 
+(leaf yaml-mode
+  :ensure t
+  :mode ("\\.yml\\'" "\\.yaml\\'"))
+
+
 ;; ;; -----------------------------------------------------------------------------------------
 ;; ;;
 ;; ;; Theme
@@ -371,8 +377,19 @@
   (leaf all-the-icons-dired
     :ensure t
     :hook (dired-mode-hook . all-the-icons-dired-mode))
-  (leaf dired-sidebar
-    :ensure t))
+
+(leaf neotree
+  :doc "Sidebar for dired"
+  :ensure t
+  :bind
+  ("<f9>" . neotree-projectile-toggle)
+  ("<f8>" . neotree-toggle)
+  :custom
+  :config
+  (setq neo-show-hidden-files t)
+  (setq neo-window-fixed-size nil)
+  (setq neo-theme 'icons)
+  )
 
 ;; ;; -----------------------------------------------------------------------------------------
 ;; ;;
