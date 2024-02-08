@@ -63,6 +63,14 @@
 ;;
 ;; -----------------------------------------------------------------------------------------
 
+;; (window-divider-mode -1)
+;; (setq window-divider-default-right-width 5)
+;; (custom-set-faces
+;;  '(window-divider ((t (:foreground "#2A2A2A")))))
+(scroll-bar-mode -1)
+(menu-bar-mode 1)
+(tool-bar-mode -1)
+
 (setq backup-directory-alist '(("." . "~/.emacs.d/backup/")))
 
 ;; Silencer
@@ -377,6 +385,7 @@
   (leaf all-the-icons-dired
     :ensure t
     :hook (dired-mode-hook . all-the-icons-dired-mode))
+  )
 
 (leaf neotree
   :doc "Sidebar for dired"
@@ -556,7 +565,6 @@
   :hook ((prog-mode-hook . display-line-numbers-mode)
          (text-mode-hook . display-line-numbers-mode)))
 
-
 (leaf rainbow-mode
   :doc "Color letter that indicate the color"
   :url "https://elpa.gnu.org/packages/rainbow-mode.html"
@@ -569,6 +577,14 @@
   :ensure t
   :hook (prog-mode-hook . rainbow-delimiters-mode))
 
+(leaf ace-window
+  :bind (("C-x o" . ace-window))
+  :config
+  (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
+  (custom-set-faces
+ '(aw-leading-char-face
+   ((t (:inherit ace-jump-face-foreground :foreground "red" :height 3.0))))))
+  
 ;; ;; -----------------------------------------------------------------------------------------
 ;; ;;
 ;; ;; Cursor
