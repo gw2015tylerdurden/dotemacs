@@ -124,7 +124,10 @@
   :config
   (with-eval-after-load 'tramp
     (add-to-list 'tramp-remote-path 'tramp-own-remote-path)
-    (setq tramp-ssh-controlmaster-options "")
+    ;(setq tramp-ssh-controlmaster-options "")
+    (setq tramp-ssh-controlmaster-options
+      "-o ControlMaster=auto -o ControlPath='tramp.%%C' -o ControlPersist=yes")
+    (setq tramp-persistency-file-name "~/.emacs.d/tramp-persistency.el")
     (setq tramp-remote-process-environment
       (append tramp-remote-process-environment
               '("BASH_ENV=~/.bashrc"
@@ -170,9 +173,12 @@
   ("M-/" . undo-tree-redo)
   :config
   (global-undo-tree-mode)
-  (setq undotree-visualizer-timestamps t
-        undotree-visualizer-diff t
-        auto-save-default nil))
+  (setq undo-tree-visualizer-timestamps t
+        undo-tree-visualizer-diff t
+        auto-save-default nil
+        undo-tree-auto-save-history t
+        undo-tree-history-directory-alist
+        `(("." . ,(expand-file-name "undo-tree-history/" user-emacs-directory)))))
 
 
 ;; ;; -----------------------------------------------------------------------------------------
@@ -210,13 +216,6 @@
   (company-selection-wrap-around . t)
   (company-minimum-prefix-length . 1)
   )
-
-(leaf ivy
-  :ensure t
-  :bind (("C-c C-r" . ivy-resume))
-  :config
-  (ivy-mode 1))
-
 
 ;; ;; -----------------------------------------------------------------------------------------
 ;; ;;
@@ -283,6 +282,8 @@
   :config
   (add-to-list 'eglot-server-programs '((python-mode) "pylsp"))
   (add-to-list 'eglot-server-programs '((c++-mode) "ccls"))
+  (custom-set-faces
+   '(eglot-highlight-symbol-face ((t (:background "#3a3d4d" :weight bold)))))
   )
 
 ;; Debugger
