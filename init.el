@@ -122,17 +122,21 @@
   (tramp-chunksize           . 4096)
   (tramp-persistency-file-name . t)
   :config
+  (customize-set-variable 'tramp-default-method "ssh")
   (with-eval-after-load 'tramp
-    (add-to-list 'tramp-remote-path 'tramp-own-remote-path)
-    ;(setq tramp-ssh-controlmaster-options "")
-    (setq tramp-ssh-controlmaster-options
-      "-o ControlMaster=auto -o ControlPath='tramp.%%C' -o ControlPersist=yes")
+    (add-to-list 'tramp-remote-path 'tramp-own-remote-path) ;; for finding remove env path
+    (setq tramp-use-ssh-controlmaster-options nil) ;; ControlMasterの設定をTrampが自動的に変更しないようにする
     (setq tramp-persistency-file-name "~/.emacs.d/tramp-persistency.el")
     (setq tramp-remote-process-environment
       (append tramp-remote-process-environment
               '("BASH_ENV=~/.bashrc"
-                "CONDA_AUTO_ACTIVATE_BASE=false"))))
-  )
+                "CONDA_AUTO_ACTIVATE_BASE=false")))
+    (setq tramp-default-keep-alive 300)
+    (setq file-system-info nil)
+    (setq tramp-directory-timeout 3000)
+    (setq create-lockfiles nil)
+    )
+)
 
 (leaf *savehist
   :doc "save history of minibuffer"
@@ -240,20 +244,6 @@
   :init
   (setq magit-auto-revert-mode nil))
 
-(leaf git-gutter
-  :doc "Show git status in fringe & operate hunks"
-  :url "https://github.com/emacsorphanage/git-gutter"
-  :ensure t
-  :global-minor-mode global-git-gutter-mode
-  :custom
-  (git-gutter:modified-sign . "┃")
-  (git-gutter:added-sign    . "┃")
-  (git-gutter:deleted-sign  . "┃")
-  :custom-face
-  (git-gutter:modified . '((t (:foreground "#f1fa8c"))))
-  (git-gutter:added    . '((t (:foreground "#50fa7b"))))
-  (git-gutter:deleted  . '((t (:foreground "#ff79c6")))))
-
 (leaf browse-at-remote
   :doc "Browse target page on github/bitbucket"
   :url "https://github.com/rmuslimov/browse-at-remote"
@@ -281,21 +271,32 @@
          (c++-mode . eglot-ensure))
   :config
   (add-to-list 'eglot-server-programs '((python-mode) "pylsp"))
+  ;(add-to-list 'eglot-server-programs '((python-mode) "pyright"))
   (add-to-list 'eglot-server-programs '((c++-mode) "ccls"))
   (custom-set-faces
    '(eglot-highlight-symbol-face ((t (:background "#3a3d4d" :weight bold)))))
   )
 
+;; lsp-bridge 
+;; (add-to-list 'load-path "~/.emacs.d/elpa/lsp-bridge")
+;; (require 'lsp-bridge)
+;; (global-lsp-bridge-mode)
+
 ;; Debugger
 (leaf dap-mode
   :doc "Client for Debug Adapter Protocol"
+  "M-x toggle-debug-on-error"
   :url "https://emacs-lsp.github.io/dap-mode/"
   :ensure t
-  :defer-config
-  (require 'dap-hydra)
+  :custom ((dap-python-debugger . 'debugpy))
+  :config
   (require 'dap-python)
-  :custom ((dap-python-debugger . 'debugpy)))
-
+  (require 'dap-hydra)
+  (require 'lsp-mode)
+  (require 'lsp-treemacs)
+  (require 'lsp-docker)
+  (setq dap-auto-configure-features '(sessions locals controls tooltip))
+  )
 
 ;; Python
 (leaf python
@@ -313,6 +314,12 @@
    ("C-c C-l" . hack-print-diff)
    ("C-c RET" . hack-test-all)
    ("C-c t"   . hack-test-one-sample)))
+
+(leaf markdown-mode
+  :ensure t
+  :mode (("\\.md\\'" . gfm-mode)
+         ("\\.markdown\\'" . gfm-mode))
+  :custom ((markdown-command . "pandoc")))
 
 (leaf yapfify
   :doc "Python formatter"
@@ -388,17 +395,11 @@
     :hook (dired-mode-hook . all-the-icons-dired-mode))
   )
 
-(leaf neotree
-  :doc "Sidebar for dired"
+(leaf treemacs
   :ensure t
   :bind
-  ("<f9>" . neotree-projectile-toggle)
-  ("<f8>" . neotree-toggle)
   :custom
   :config
-  (setq neo-show-hidden-files t)
-  (setq neo-window-fixed-size nil)
-  (setq neo-theme 'icons)
   )
 
 ;; ;; -----------------------------------------------------------------------------------------
@@ -444,6 +445,7 @@
   :bind
   ("M-y"   . consult-yank-pop)
   ("C-M-s" . consult-line)
+  ("C-x b" . consult-buffer)
   :custom (consult-async-min-input . 1))
 (leaf consult-flycheck
   :doc "Consult integration for Flycheck"
@@ -461,6 +463,8 @@
   :doc "Custom functions to search org documents"
   :after affe
   :require affe)
+(leaf ag
+  :ensure t)
 
 (leaf marginalia
   :doc "Explain details of the consult candidates"
@@ -635,15 +639,27 @@
 ;; ;;
 ;; ;; -----------------------------------------------------------------------------------------
 
-(leaf markdown-mode
-  :ensure t
-  :mode (("\\.md\\'" . gfm-mode)
-         ("\\.markdown\\'" . gfm-mode))
-  :custom ((markdown-command . "pandoc")))
-
 (leaf pandoc
   :ensure t
   :after markdown-mode)
+
+(leaf vterm
+  ;; requirements: brew install cmake libvterm libtool
+  :ensure t
+  :custom
+  (vterm-max-scrollback . 10000)
+  (vterm-buffer-name-string . "vterm: %s")
+  :config
+  ;; (defun my/vterm-counsel-yank-pop-action (orig-fun &rest args)
+  ;;   (if (equal major-mode 'vterm-mode)
+  ;;       (let ((inhibit-read-only t)
+  ;;             (yank-undo-function (lambda (_start _end) (vterm-undo))))
+  ;;         (cl-letf (((symbol-function 'insert-for-yank)
+  ;;                    (lambda (str) (vterm-send-string str t))))
+  ;;           (apply orig-fun args)))
+  ;;     (apply orig-fun args)))
+  ;; (advice-add 'counsel-yank-pop-action :around #'my/vterm-counsel-yank-pop-action)
+  )
 
 ;; ;; -----------------------------------------------------------------------------------------
 ;; ;;
@@ -657,12 +673,13 @@
 ;;   (when (memq system-type '(gnu/linux darwin))
 ;;     (exec-path-from-shell-initialize)))
 
-;; (leaf evil
-;;   :ensure t
-;;   :config
-;;   (evil-mode 1)
-;;   (define-key evil-insert-state-map (kbd "C-z") 'evil-emacs-state)
-;;   )
+(leaf evil
+  :ensure t
+  :config
+  (evil-mode 1)
+  (setcdr evil-insert-state-map nil) ; insert mode for emacs bind
+  (define-key evil-insert-state-map [escape] 'evil-normal-state)
+  )
 
 
 ;; (leaf evil-collection
