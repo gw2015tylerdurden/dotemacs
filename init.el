@@ -397,9 +397,17 @@
 
 (leaf treemacs
   :ensure t
-  :bind
   :custom
   :config
+  (with-eval-after-load 'treemacs
+    (require 'treemacs-all-the-icons)
+    (treemacs-load-theme "all-the-icons"))
+  (setq treemacs-width-is-initially-locked nil)
+
+  (with-eval-after-load 'treemacs
+    (setq treemacs-filewatch-mode t)
+    (setq treemacs-git-mode t)
+    (setq treemacs-collapse-dirs 3)
   )
 
 ;; ;; -----------------------------------------------------------------------------------------
@@ -677,10 +685,14 @@
   :ensure t
   :config
   (evil-mode 1)
-  (setcdr evil-insert-state-map nil) ; insert mode for emacs bind
+  ; insert mode for emacs bind
+  (setcdr evil-insert-state-map nil)
   (define-key evil-insert-state-map [escape] 'evil-normal-state)
-  )
 
+  ; treemacs
+  (define-key evil-normal-state-map (kbd "SPC t") 'treemacs)
+  (define-key evil-normal-state-map (kbd "SPC 0") 'treemacs-select-window)
+  )
 
 ;; (leaf evil-collection
 ;;   :ensure t
