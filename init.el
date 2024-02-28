@@ -349,7 +349,7 @@
 ;; ;;
 ;; ;; -----------------------------------------------------------------------------------------
 (leaf kanagawa-theme
-  :ensure t
+ :ensure t
   :config
   (load-theme 'kanagawa t))
 
@@ -407,7 +407,7 @@
   (with-eval-after-load 'treemacs
     (setq treemacs-filewatch-mode t)
     (setq treemacs-git-mode t)
-    (setq treemacs-collapse-dirs 3)
+    (setq treemacs-collapse-dirs 3))
   )
 
 ;; ;; -----------------------------------------------------------------------------------------
@@ -419,8 +419,10 @@
   :doc "Project navigation and management library"
   :url "https://github.com/bbatsov/projectile"
   :ensure t
-  ;; :config
-  ;; (projectile-mode 1)
+  :bind
+  ("C-x C-s" . projectile-save-project-buffers)
+  :config
+  (projectile-mode 1)
   )
 
 ;; ;; Vertico --------------------------------------------------------------------------------
