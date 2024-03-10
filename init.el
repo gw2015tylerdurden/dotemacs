@@ -242,6 +242,7 @@
   :url "https://magit.vc/"
   :ensure t
   :init
+  (setq magit-completing-read-function 'ivy-completing-read)
   (setq magit-auto-revert-mode nil))
 
 (leaf browse-at-remote
@@ -422,31 +423,101 @@
   :bind
   ("C-x C-s" . projectile-save-project-buffers)
   :config
+  (setq projectile-completion-system 'ivy)
   (projectile-mode 1)
   )
 
-;; ;; Vertico --------------------------------------------------------------------------------
+;; ;; ;; Vertico --------------------------------------------------------------------------------
+;; (leaf vertico
+;;   :doc "Completion interface"
+;;   :url "https://github.com/minad/vertico/"
+;;   :global-minor-mode vertico-mode
+;;   :ensure t
+;;   :custom
+;;   (vertico-cycle . t)
+;;   (vertico-count . 18))
 
-(leaf vertico
-  :doc "Completion interface"
-  :url "https://github.com/minad/vertico/"
-  :global-minor-mode vertico-mode
-  :ensure t
-  :custom
-  (vertico-cycle . t)
-  (vertico-count . 18))
+;; (leaf vertico-posframe
+;;   :doc "Show Vertico in posframe"
+;;   :url "https://github.com/tumashu/vertico-posframe"
+;;   :global-minor-mode vertico-posframe-mode
+;;   :ensure t
+;;   :custom
+;;   (vertico-posframe-border-width . 5)
+;;   (vertico-posframe-parameters
+;;    .  '((left-fringe . 8)
+;;         (right-fringe . 8)))
+;;   )
 
-(leaf vertico-posframe
-  :doc "Show Vertico in posframe"
-  :url "https://github.com/tumashu/vertico-posframe"
-  :global-minor-mode vertico-posframe-mode
+;; ;; ;; ivy --------------------------------------------------------------------------------
+(leaf ivy
   :ensure t
-  :custom
-  (vertico-posframe-border-width . 5)
-  (vertico-posframe-parameters
-   .  '((left-fringe . 8)
-        (right-fringe . 8)))
+  :custom ((ivy-use-virtual-buffers . t)
+           (enable-recursive-minibuffers . t))
+  :config
+  (ivy-mode 1)
+  (custom-set-faces
+   '(ivy-minibuffer-match-face-1 ((t (:foreground "#66ff00" :background "#2E2E2E" :weight bold)))))
   )
+
+(leaf counsel
+  :ensure t
+  :bind
+  ("C-s" . swiper)
+  ("M-s r" . ivy-resume)
+  ("C-c v p" . ivy-push-view)
+  ("C-c v o" . ivy-pop-view)
+  ("C-c v ." . ivy-switch-view)
+  ("M-s c" . counsel-ag)
+  ("M-o f" . counsel-fzf)
+  ("M-o r" . counsel-recentf)
+  ("M-y" . counsel-yank-pop)
+  :custom
+  (counsel-yank-pop-height . 15)
+  (enable-recursive-minibuffers . t)
+  (ivy-use-selectable-prompt . t)
+  (ivy-use-virtual-buffers . t)
+  (swiper-action-recenter . t)
+  :config
+  (counsel-mode 1)
+  ;; Enhance fuzzy matching
+  (leaf flx
+    :ensure t)
+  ;; Enhance M-x
+  (leaf amx
+    :ensure t)
+
+  (leaf counsel-projectile
+    :ensure t
+    :config (counsel-projectile-mode 1))
+  )
+
+(leaf ivy-posframe
+  :ensure t
+  :custom
+  (ivy-display-function #'ivy-posframe-display-at-frame-center)
+  ;; (ivy-posframe-width 130)
+  ;; (ivy-posframe-height 11)
+  (ivy-posframe-parameters
+   '((left-fringe . 5)
+     (right-fringe . 5)))
+  :hook
+  (ivy-mode . ivy-posframe-enable))
+
+(leaf ivy-rich
+  :ensure t
+  :after ivy
+  :custom (ivy-rich-path-style . 'abbrev)
+  :config
+  (ivy-rich-mode 1))
+
+(leaf all-the-icons-ivy-rich
+  :ensure t
+  :after ivy-rich
+  :config
+  (all-the-icons-ivy-rich-mode 1))
+
+;;;-----
 
 (leaf consult
   :doc "Generate completion candidates and provide commands for completion"
@@ -454,7 +525,6 @@
   :ensure t
   :bind
   ("M-y"   . consult-yank-pop)
-  ("C-M-s" . consult-line)
   ("C-x b" . consult-buffer)
   :custom (consult-async-min-input . 1))
 (leaf consult-flycheck
