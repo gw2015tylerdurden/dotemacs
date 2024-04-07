@@ -52,7 +52,7 @@
   (comp-speed                . 5)
   (comp-num-cpus             . 4)
   :config
-  (native-compile-async "~/.emacs.d/early-init.el" 4 t)
+  ;(native-compile-async "~/.emacs.d/early-init.el" 4 t)
   (native-compile-async "~/.emacs.d/init.el" 4 t)
   (native-compile-async "~/.emacs.d/elpa/" 4 t)
   (native-compile-async "~/.emacs.d/el-get/" 4 t))
@@ -125,16 +125,12 @@
   (customize-set-variable 'tramp-default-method "ssh")
   (with-eval-after-load 'tramp
     (add-to-list 'tramp-remote-path 'tramp-own-remote-path) ;; for finding remove env path
-    (setq tramp-use-ssh-controlmaster-options nil) ;; ControlMasterの設定をTrampが自動的に変更しないようにする
+    ;(setq tramp-use-ssh-controlmaster-options nil) ;; ControlMasterの設定をTrampが自動的に変更しないようにする
     (setq tramp-persistency-file-name "~/.emacs.d/tramp-persistency.el")
     (setq tramp-remote-process-environment
       (append tramp-remote-process-environment
               '("BASH_ENV=~/.bashrc"
                 "CONDA_AUTO_ACTIVATE_BASE=false")))
-    (setq tramp-default-keep-alive 300)
-    (setq file-system-info nil)
-    (setq tramp-directory-timeout 3000)
-    (setq create-lockfiles nil)
     )
 )
 
@@ -274,8 +270,21 @@
   (add-to-list 'eglot-server-programs '((python-mode) "pylsp"))
   ;(add-to-list 'eglot-server-programs '((python-mode) "pyright"))
   (add-to-list 'eglot-server-programs '((c++-mode) "ccls"))
-  (custom-set-faces
-   '(eglot-highlight-symbol-face ((t (:background "#3a3d4d" :weight bold)))))
+  ;; (custom-set-faces
+  ;;  '(eglot-highlight-symbol-face ((t (:background "#3a3d4d" :weight bold)))))
+  )
+
+(leaf highlight-symbol
+  :ensure t
+  :init
+  (add-hook 'prog-mode-hook 'highlight-symbol-mode)
+  (add-hook 'text-mode-hook 'highlight-symbol-mode)
+  :bind
+  ("M-n" . highlight-symbol-next)
+  ("M-p" . highlight-symbol-prev)
+  :config
+  (setq highlight-symbol-on-navigation-p t)
+  (setq highlight-symbol-idle-delay 0)
   )
 
 ;; lsp-bridge 
@@ -315,6 +324,14 @@
    ("C-c C-l" . hack-print-diff)
    ("C-c RET" . hack-test-all)
    ("C-c t"   . hack-test-one-sample)))
+
+(leaf ein
+  :doc "Emacs IPython Notebook"
+  :ensure t
+  :config
+  (setq ein:completion-backend 'ein:use-company-backend)
+  )
+
 
 (leaf markdown-mode
   :ensure t
@@ -753,18 +770,18 @@
 ;;   (when (memq system-type '(gnu/linux darwin))
 ;;     (exec-path-from-shell-initialize)))
 
-(leaf evil
-  :ensure t
-  :config
-  (evil-mode 1)
-  ; insert mode for emacs bind
-  (setcdr evil-insert-state-map nil)
-  (define-key evil-insert-state-map [escape] 'evil-normal-state)
+;; (leaf evil
+;;   :ensure t
+;;   :config
+;;   (evil-mode 1)
+;;   ; insert mode for emacs bind
+;;   (setcdr evil-insert-state-map nil)
+;;   (define-key evil-insert-state-map [escape] 'evil-normal-state)
 
-  ; treemacs
-  (define-key evil-normal-state-map (kbd "SPC t") 'treemacs)
-  (define-key evil-normal-state-map (kbd "SPC 0") 'treemacs-select-window)
-  )
+;;   ; treemacs
+;;   (define-key evil-normal-state-map (kbd "SPC t") 'treemacs)
+;;   (define-key evil-normal-state-map (kbd "SPC 0") 'treemacs-select-window)
+;;   )
 
 ;; (leaf evil-collection
 ;;   :ensure t
