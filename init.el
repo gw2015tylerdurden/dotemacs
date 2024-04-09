@@ -70,6 +70,7 @@
 (scroll-bar-mode -1)
 (menu-bar-mode 1)
 (tool-bar-mode -1)
+(setq-default truncate-lines nil)
 
 (setq backup-directory-alist '(("." . "~/.emacs.d/backup/")))
 
@@ -217,6 +218,13 @@
   (company-minimum-prefix-length . 1)
   )
 
+(leaf smartparens
+  :ensure t
+  :init
+  :hook
+  (prog-mode-hook . smartparens-mode)
+  )
+
 ;; ;; -----------------------------------------------------------------------------------------
 ;; ;;
 ;; ;; Tools
@@ -330,6 +338,8 @@
   :ensure t
   :config
   (setq ein:completion-backend 'ein:use-company-backend)
+  (setq ein:worksheet-enable-undo t)
+  (setq ein:output-area-inlined-images t)
   )
 
 
@@ -385,14 +395,32 @@
 (leaf dashboard
   :ensure t
   :config
+  (setq dashboard-banner-logo-title "Welcome to the Fight Club")
   (setq dashboard-startup-banner "~/.emacs.d/fightclub.png")
-  (dashboard-setup-startup-hook)
-  (setq dashboard-items '((recents  . 5)
-                          (bookmarks . 5)
-                          (projects . 5)
+  (setq dashboard-items '((projects . 5)
+                          (recents  . 5)
                           (agenda . 5)
                           (registers . 5)))
   (setq dashboard-center-content t)
+
+  (setq dashboard-icon-type 'all-the-icons)
+  (setq dashboard-display-icons-p t)     ; display icons on both GUI and terminal
+
+  (setq dashboard-set-file-icons t)
+  (setq dashboard-set-heading-icons t)
+
+  (dashboard-setup-startup-hook) ;; bottom is needed
+  )
+
+(leaf highlight-indent-guides
+  :ensure t
+  :hook (prog-mode-hook . highlight-indent-guides-mode)
+  :custom
+  (highlight-indent-guides-method . 'character)
+  :config
+  (set-face-foreground 'highlight-indent-guides-character-face "#5b6268")
+  (set-face-foreground 'highlight-indent-guides-top-character-face "#5b6268")
+  (set-face-foreground 'highlight-indent-guides-stack-character-face "#5b6268")
   )
 
 ;; ;; -----------------------------------------------------------------------------------------
